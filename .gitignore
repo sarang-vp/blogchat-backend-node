@@ -1,0 +1,167 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# macOS
+.DS_Store
+
+# Editor and IDE files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Compiled files
+*.log
+*.out
+*.pid
+*.seed
+*.swn
+*.swo
+*.swp
+*.tgz
+*.zip
+*.tar.gz
+*.rar
+*.tar.xz
+*.tar.zst
+*.tar.lz
+*.war
+*.jar
+*.json
+*.sqlite
+*.sqlite3
+*.db
+*.pdb
+
+# Dependency lock files
+yarn.lock
+package-lock.json
+shrinkwrap.yaml
+composer.lock
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.staging
+.env.production
+.env.local.js
+.env.local.ts
+
+# Log files
+*.log
+logs/
+log-debug.txt
+log-error.txt
+log-info.txt
+log-verbose.txt
+log-warn.txt
+log-*.log
+
+# Build output
+build/
+dist/
+out/
+
+# Coverage directory used by tools like Istanbul
+coverage/
+
+# Next.js
+.next/
+out/
+node_modules/
+.cache/
+public/
+
+# Nuxt.js
+.nuxt/
+dist/
+
+# Gatsby.js
+.cache/
+public/
+.cache-loader/
+public/static/
+public/dist/
+public/.webpack/
+
+# Vuepress
+node_modules/
+.vuepress/dist/
+.vuepress/public/
+
+# Svelte
+__sapper__/
+node_modules/
+public/build/
+public/dist/
+public/bundle/
+
+# Hugo
+resources/
+public/
+node_modules/
+
+# Jekyll
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
+
+# Compiled Python files
+*.pyc
+__pycache__/
+
+# Compiled Ruby files
+*.gem
+*.rbc
+/.config
+/coverage/
+/InstalledFiles
+/pkg/
+/spec/reports/
+/spec/examples.txt
+/test/tmp/
+/test/version_tmp/
+/tmp/
+/vendor/bundle/
+.vagrant/
+.vcr/
+*.log
+*.sqlite3
+/config/deploy/
+/log/
+/public/system/
+/tmp/cache/
+/tmp/sockets/
+/tmp/pids/
+/*.pid
+/*.seed
+/*.lock
+/cache/
+/db/*.sqlite3
+/db/*.sqlite3-journal
+/public/system/
+/tmp/
+/log/
+/tmp/
+!log/.keep
+!/public/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
