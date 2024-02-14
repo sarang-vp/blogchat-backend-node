@@ -7,7 +7,7 @@ const app = express();
 const server = http.createServer(app);
 const mongoose = require("mongoose");
 require("dotenv").config();
-
+const { ChatModel } = require("./src/model/userModel");
 // const io = socketIo(server);
 mongoose
   .connect("mongodb://127.0.0.1:27017/blogChatDB", { useNewUrlParser: true })
@@ -35,7 +35,14 @@ app.use(
     extended: true,
   })
 );
-
+// Map to store user IDs and their corresponding WebSocket connections
+const userSockets = new Map();
+// Define Socket.IO middleware to pass 'io' instance to controllers
+app.use((req, res, next) => {
+  req.app.set("io", io);
+  req.userSockets = userSockets;
+  next();
+});
 app.use(express.json({ limit: "50mb" }));
 // app.use((req, res, next) => {
 //   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -43,26 +50,6 @@ app.use(express.json({ limit: "50mb" }));
 //   next();
 // });
 app.use(fileUpload());
-// Socket.io connection event
-// io.on('connection', (socket) => {
-//   console.log('A user connected');
-
-//   // Handle incoming messages
-//   socket.on('message', (message) => {
-//     console.log(message);
-//     // Broadcast the message to all connected clients
-//     io.emit('message', message);
-//   });
-
-//   // Handle user disconnection
-//   socket.on('disconnect', () => {
-//     console.log('A user disconnected');
-//   });
-// });
-// Server-side Socket.IO connection event
-// Server-side Socket.IO connection event
-// Initialize connectedClients object to track connected users and their sockets
-const connectedClients = {};
 
 // Server-side Socket.IO connection event
 io.on("connection", (socket) => {
@@ -70,17 +57,19 @@ io.on("connection", (socket) => {
 
   // Handle username assignment
   socket.on("setUsername", (username) => {
-    //console.log(`User ${username} connected`);
+    userSockets.set(username, socket);
+    console.log(`User ${username} connected`);
     socket.username = username; // Set the username property on the socket object
-    connectedClients[username] = socket; // Add the socket to connectedClients object
+    //connectedClients[username] = socket; // Add the socket to connectedClients object
   });
 
   // Handle private messages
-  socket.on("privateMessage", async ({ recipient,sender, message }) => {
+  socket.on("privateMessage", async ({ recipient, sender, message }) => {
     //console.log(`Sending private message from ${socket.username} to ${recipient}: ${message}`);
     try {
       const newChatMessage = new ChatModel({
-        sender: sender,
+        /* sender: sender,*/
+        sender: socket.username,
         receiver: recipient,
         message: message,
       });
@@ -90,15 +79,14 @@ io.on("connection", (socket) => {
       console.error("Error saving chat message:", error);
     }
 
-    // Find the recipient client and send the private message
-    const recipientSocket = connectedClients[recipient];
-    if (recipientSocket) {
-      recipientSocket.emit("privateMessage", {
+    const userSocket = userSockets.get(recipient);
+    if (userSocket) {
+      userSocket.emit("privateMessage", {
         sender: socket.username,
         message,
       });
     } else {
-      socket.emit('offlineResponse', { message: 'User offline' });
+      socket.emit("offlineResponse", { message: "User offline" });
       console.log(`Recipient ${recipient} not found.`);
       // Handle recipient not found (e.g., display an error message to the sender)
     }
@@ -106,10 +94,10 @@ io.on("connection", (socket) => {
 
   // Handle user disconnection
   socket.on("disconnect", () => {
-    console.log("A user disconnected");
-    // Remove the user from connectedClients map
-    if (socket.username) {
-      delete connectedClients[socket.username];
+    console.log(`User ${socket.id} disconnected`);
+    const username = socket.username;
+    if (username) {
+      userSockets.delete(username); // Remove the user socket from userSockets map
     }
   });
 });
@@ -118,9 +106,9 @@ io.on("connection", (socket) => {
 const userRoutes = require("./src/routes/userRoute");
 app.use("/users", userRoutes);
 const offerRoutes = require("./src/routes/offerRoutes");
-const { ChatModel } = require("./src/model/userModel");
 app.use("/offer", offerRoutes);
 // Start the server
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+module.exports = userSockets;

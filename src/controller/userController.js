@@ -5,7 +5,8 @@ const xlsx = require("xlsx");
 const fs = require("fs");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const { default: mongoose } = require("mongoose");
+const { default: mongoose, isObjectIdOrHexString } = require("mongoose");
+//const userSockets = require("../../app.js");
 
 exports.createUser = async (req, res) => {
   try {
@@ -23,9 +24,11 @@ exports.createUser = async (req, res) => {
   }
 };
 module.exports.signUp = async (req, res) => {
+  //console.log(connectedClients);
   try {
+    console.log("object");
     const { userName, passWord, db } = req.body;
-
+    console.log(req.userSockets);
     // Check if username already exists
     const existingUser = await userModel.findOne({ userName });
     if (existingUser) {
@@ -38,8 +41,16 @@ module.exports.signUp = async (req, res) => {
 
     // Create new user
     const newUser = new userModel({ userName, passWord: hashedpassWord, db });
-    await newUser.save();
-    return (res = { data: newUser, status: 200 });
+    let savedData = await newUser.save();
+
+    //req.app.get("io").emit("newOrder", savedData);
+    const userSocket = req.userSockets.get(req.body.userId);
+    if (userSocket) {
+      userSocket.emit("newUser", savedData);
+    } else {
+      console.log(`User socket not found for user with ID ${userId}`);
+    }
+    return (res = { data: savedData, status: 200 });
     //res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
     console.error("Error signing up:", error);
@@ -88,14 +99,18 @@ module.exports.login = async (req, res) => {
 module.exports.userList = async (req, res) => {
   try {
     // Check if username already exists
-    const existingUser = await userModel.find({
-      _id: { $ne: req.body.userName },
-    });
+    let existingUser = null;
+    if (isObjectIdOrHexString(req.body.userName)) {
+      existingUser = await userModel.find({
+        _id: { $ne: req.body.userName },
+      });
+    }
+    existingUser = await userModel.find({});
     if (existingUser) {
       return (res = { data: existingUser, status: 200 });
       //return res.status(400).json({ message: 'Username already exists' });
     } else {
-      return (res = { data: "not found", status: 404 });
+      return (res = { data: "not found", status: 200 });
     }
     //res.status(201).json({ message: 'User created successfully' });
   } catch (error) {
@@ -146,7 +161,7 @@ module.exports.userChatHistory = async (req, res) => {
         $sort: { timestamp: 1 }, // Sort in ascending order by timestamp
       },
       {
-        $limit: 40,
+        $limit: 10,
       },
       {
         $project: {
@@ -159,7 +174,7 @@ module.exports.userChatHistory = async (req, res) => {
     if (chatHist.length > 0) {
       return (res = { data: chatHist, status: 200 });
     } else {
-      return (res = { data: "not found", status: 404 });
+      return (res = { data: [], status: 200 });
     }
   } catch (error) {
     console.error("Error:", error);

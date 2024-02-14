@@ -8,25 +8,25 @@ const {
   validateUserRegistration,
 } = require("../controller/validator");
 const { validationResult } = require("express-validator");
-
+// const injectUserSockets = require("../middleware/socketmiddle");
 
 // Route for creating a new user
 // router.post("/add", userController.createUser);
 router.post("/signUp", async (req, res) => {
   let result = await userController.signUp(req);
-  res.status(result.data).send(result.status);
+  res.status(result.status).send(result.data);
 });
 router.post("/login", async (req, res) => {
   let result = await userController.login(req);
-  res.status(result.status).send(result.data)
+  res.status(result.status).send(result.data);
 });
 router.post("/userList", async (req, res) => {
   let result = await userController.userList(req);
-  res.status(result.status).send(result.data)
+  res.status(result.status).send(result.data);
 });
 router.post("/userChatHistory", async (req, res) => {
   let result = await userController.userChatHistory(req);
-  res.status(result.status).send(result.data)
+  res.status(result.status).send(result.data);
 });
 router.post("/addMany", userController.createUserArray);
 router.post("/testArray", userController.testArray);
